@@ -51,13 +51,23 @@ namespace GameOfLife {
 		public override string ToString() {
 			StringBuilder sb = new StringBuilder();
 
-			sb.Append("{ { init: ");
+			//sb.Append("{ { init: ");
+			//sb.Append(IsInitial == true ? 1 : 0);
+			//sb.Append(" }; { alive: ");
+			//sb.Append(IsAlive == true ? 1 : 0);
+			//sb.Append(" }; { next: ");
+			//sb.Append(NextState == true ? 1 : 0);
+			//sb.Append(" }; { neighbors: ");
+			//sb.Append(NumNeighbors);
+			//sb.Append(" }; }");
+
+			sb.Append("{ { ");
 			sb.Append(IsInitial == true ? 1 : 0);
-			sb.Append(" }; { alive: ");
+			sb.Append(" }; { ");
 			sb.Append(IsAlive == true ? 1 : 0);
-			sb.Append(" }; { next: ");
+			sb.Append(" }; { ");
 			sb.Append(NextState == true ? 1 : 0);
-			sb.Append(" }; { neighbors: ");
+			sb.Append(" }; { ");
 			sb.Append(NumNeighbors);
 			sb.Append(" }; }");
 

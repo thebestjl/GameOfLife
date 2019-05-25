@@ -24,8 +24,8 @@
 		/// </summary>
 		private void InitializeComponent() {
 			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmGoL));
 			this.tsOptions = new System.Windows.Forms.ToolStrip();
-			this.tslOptions = new System.Windows.Forms.ToolStripLabel();
 			this.btnStart = new System.Windows.Forms.Button();
 			this.btnReset = new System.Windows.Forms.Button();
 			this.btnClear = new System.Windows.Forms.Button();
@@ -37,7 +37,7 @@
 			this.dgvCells = new System.Windows.Forms.DataGridView();
 			this.nudSpeed = new System.Windows.Forms.NumericUpDown();
 			this.lblSpeed = new System.Windows.Forms.Label();
-			this.btnStop = new System.Windows.Forms.Button();
+			this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
 			this.tsOptions.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dgvCells)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudSpeed)).BeginInit();
@@ -47,17 +47,11 @@
 			// 
 			this.tsOptions.ImageScalingSize = new System.Drawing.Size(20, 20);
 			this.tsOptions.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tslOptions});
+            this.toolStripDropDownButton1});
 			this.tsOptions.Location = new System.Drawing.Point(0, 0);
 			this.tsOptions.Name = "tsOptions";
-			this.tsOptions.Size = new System.Drawing.Size(800, 25);
+			this.tsOptions.Size = new System.Drawing.Size(800, 27);
 			this.tsOptions.TabIndex = 0;
-			// 
-			// tslOptions
-			// 
-			this.tslOptions.Name = "tslOptions";
-			this.tslOptions.Size = new System.Drawing.Size(61, 22);
-			this.tslOptions.Text = "Options";
 			// 
 			// btnStart
 			// 
@@ -65,27 +59,29 @@
 			this.btnStart.Name = "btnStart";
 			this.btnStart.Size = new System.Drawing.Size(117, 31);
 			this.btnStart.TabIndex = 1;
-			this.btnStart.Text = "Start/Pause";
+			this.btnStart.Text = "Start";
 			this.btnStart.UseVisualStyleBackColor = true;
 			this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
 			// 
 			// btnReset
 			// 
-			this.btnReset.Location = new System.Drawing.Point(671, 91);
+			this.btnReset.Location = new System.Drawing.Point(671, 61);
 			this.btnReset.Name = "btnReset";
 			this.btnReset.Size = new System.Drawing.Size(117, 31);
 			this.btnReset.TabIndex = 2;
 			this.btnReset.Text = "Reset";
 			this.btnReset.UseVisualStyleBackColor = true;
+			this.btnReset.Click += new System.EventHandler(this.btnReset_Click);
 			// 
 			// btnClear
 			// 
-			this.btnClear.Location = new System.Drawing.Point(671, 121);
+			this.btnClear.Location = new System.Drawing.Point(671, 91);
 			this.btnClear.Name = "btnClear";
 			this.btnClear.Size = new System.Drawing.Size(117, 31);
 			this.btnClear.TabIndex = 3;
 			this.btnClear.Text = "Clear";
 			this.btnClear.UseVisualStyleBackColor = true;
+			this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
 			// 
 			// btnRandomize
 			// 
@@ -95,6 +91,7 @@
 			this.btnRandomize.TabIndex = 4;
 			this.btnRandomize.Text = "Randomize";
 			this.btnRandomize.UseVisualStyleBackColor = true;
+			this.btnRandomize.Click += new System.EventHandler(this.btnRandomize_Click);
 			// 
 			// txtWidth
 			// 
@@ -160,7 +157,7 @@
             0,
             0,
             131072});
-			this.nudSpeed.Location = new System.Drawing.Point(723, 170);
+			this.nudSpeed.Location = new System.Drawing.Point(723, 140);
 			this.nudSpeed.Maximum = new decimal(new int[] {
             5,
             0,
@@ -183,27 +180,27 @@
 			// lblSpeed
 			// 
 			this.lblSpeed.AutoSize = true;
-			this.lblSpeed.Location = new System.Drawing.Point(668, 172);
+			this.lblSpeed.Location = new System.Drawing.Point(668, 142);
 			this.lblSpeed.Name = "lblSpeed";
 			this.lblSpeed.Size = new System.Drawing.Size(53, 17);
 			this.lblSpeed.TabIndex = 11;
 			this.lblSpeed.Text = "Speed:";
 			// 
-			// btnStop
+			// toolStripDropDownButton1
 			// 
-			this.btnStop.Location = new System.Drawing.Point(671, 61);
-			this.btnStop.Name = "btnStop";
-			this.btnStop.Size = new System.Drawing.Size(117, 31);
-			this.btnStop.TabIndex = 12;
-			this.btnStop.Text = "Stop";
-			this.btnStop.UseVisualStyleBackColor = true;
+			this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
+			this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+			this.toolStripDropDownButton1.Size = new System.Drawing.Size(75, 24);
+			this.toolStripDropDownButton1.Text = "Options";
+			this.toolStripDropDownButton1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// FrmGoL
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
-			this.Controls.Add(this.btnStop);
 			this.Controls.Add(this.lblSpeed);
 			this.Controls.Add(this.nudSpeed);
 			this.Controls.Add(this.dgvCells);
@@ -229,7 +226,6 @@
 		#endregion
 
 		private System.Windows.Forms.ToolStrip tsOptions;
-		private System.Windows.Forms.ToolStripLabel tslOptions;
 		private System.Windows.Forms.Button btnStart;
 		private System.Windows.Forms.Button btnReset;
 		private System.Windows.Forms.Button btnClear;
@@ -241,7 +237,7 @@
 		private System.Windows.Forms.DataGridView dgvCells;
 		private System.Windows.Forms.NumericUpDown nudSpeed;
 		private System.Windows.Forms.Label lblSpeed;
-		private System.Windows.Forms.Button btnStop;
+		private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
 	}
 }
 
