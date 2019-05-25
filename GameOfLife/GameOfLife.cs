@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GameOfLife {
-	static class Program {
+	static class GameOfLife {
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
@@ -13,7 +13,7 @@ namespace GameOfLife {
 		static void Main() {
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new Form1());
+			Application.Run(new FrmGoL());
 		}
 	}
 }
