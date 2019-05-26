@@ -23,10 +23,9 @@
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent() {
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmGoL));
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.tsOptions = new System.Windows.Forms.ToolStrip();
-			this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
 			this.btnStart = new System.Windows.Forms.Button();
 			this.btnReset = new System.Windows.Forms.Button();
 			this.btnClear = new System.Windows.Forms.Button();
@@ -38,6 +37,8 @@
 			this.dgvCells = new System.Windows.Forms.DataGridView();
 			this.nudSpeed = new System.Windows.Forms.NumericUpDown();
 			this.lblSpeed = new System.Windows.Forms.Label();
+			this.btnSnap = new System.Windows.Forms.Button();
+			this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
 			this.tsOptions.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dgvCells)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudSpeed)).BeginInit();
@@ -52,16 +53,6 @@
 			this.tsOptions.Name = "tsOptions";
 			this.tsOptions.Size = new System.Drawing.Size(800, 27);
 			this.tsOptions.TabIndex = 0;
-			// 
-			// toolStripDropDownButton1
-			// 
-			this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-			this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
-			this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-			this.toolStripDropDownButton1.Size = new System.Drawing.Size(75, 24);
-			this.toolStripDropDownButton1.Text = "Options";
-			this.toolStripDropDownButton1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// btnStart
 			// 
@@ -105,22 +96,22 @@
 			// 
 			// txtWidth
 			// 
-			this.txtWidth.Location = new System.Drawing.Point(723, 342);
+			this.txtWidth.Location = new System.Drawing.Point(723, 370);
 			this.txtWidth.Name = "txtWidth";
-			this.txtWidth.Size = new System.Drawing.Size(60, 22);
+			this.txtWidth.Size = new System.Drawing.Size(65, 22);
 			this.txtWidth.TabIndex = 5;
 			// 
 			// txtHeight
 			// 
-			this.txtHeight.Location = new System.Drawing.Point(723, 371);
+			this.txtHeight.Location = new System.Drawing.Point(723, 342);
 			this.txtHeight.Name = "txtHeight";
-			this.txtHeight.Size = new System.Drawing.Size(60, 22);
+			this.txtHeight.Size = new System.Drawing.Size(65, 22);
 			this.txtHeight.TabIndex = 6;
 			// 
 			// lblWidth
 			// 
 			this.lblWidth.AutoSize = true;
-			this.lblWidth.Location = new System.Drawing.Point(672, 345);
+			this.lblWidth.Location = new System.Drawing.Point(668, 373);
 			this.lblWidth.Name = "lblWidth";
 			this.lblWidth.Size = new System.Drawing.Size(48, 17);
 			this.lblWidth.TabIndex = 7;
@@ -129,7 +120,7 @@
 			// lblHeight
 			// 
 			this.lblHeight.AutoSize = true;
-			this.lblHeight.Location = new System.Drawing.Point(667, 374);
+			this.lblHeight.Location = new System.Drawing.Point(668, 342);
 			this.lblHeight.Name = "lblHeight";
 			this.lblHeight.Size = new System.Drawing.Size(53, 17);
 			this.lblHeight.TabIndex = 8;
@@ -143,14 +134,14 @@
 			this.dgvCells.AllowUserToResizeRows = false;
 			this.dgvCells.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
 			this.dgvCells.ColumnHeadersVisible = false;
-			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
-			dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
-			dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Window;
-			dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.ControlText;
-			dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dgvCells.DefaultCellStyle = dataGridViewCellStyle1;
+			dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Window;
+			dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.ControlText;
+			dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Window;
+			dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+			dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dgvCells.DefaultCellStyle = dataGridViewCellStyle3;
 			this.dgvCells.Location = new System.Drawing.Point(15, 35);
 			this.dgvCells.Name = "dgvCells";
 			this.dgvCells.RowHeadersVisible = false;
@@ -179,7 +170,7 @@
             0,
             131072});
 			this.nudSpeed.Name = "nudSpeed";
-			this.nudSpeed.Size = new System.Drawing.Size(60, 22);
+			this.nudSpeed.Size = new System.Drawing.Size(65, 22);
 			this.nudSpeed.TabIndex = 10;
 			this.nudSpeed.Value = new decimal(new int[] {
             10,
@@ -196,11 +187,33 @@
 			this.lblSpeed.TabIndex = 11;
 			this.lblSpeed.Text = "Speed:";
 			// 
+			// btnSnap
+			// 
+			this.btnSnap.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+			this.btnSnap.Location = new System.Drawing.Point(671, 168);
+			this.btnSnap.Name = "btnSnap";
+			this.btnSnap.Size = new System.Drawing.Size(117, 31);
+			this.btnSnap.TabIndex = 12;
+			this.btnSnap.Text = "Snap";
+			this.btnSnap.UseVisualStyleBackColor = true;
+			this.btnSnap.Click += new System.EventHandler(this.btnSnap_Click);
+			// 
+			// toolStripDropDownButton1
+			// 
+			this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
+			this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+			this.toolStripDropDownButton1.Size = new System.Drawing.Size(75, 24);
+			this.toolStripDropDownButton1.Text = "Options";
+			this.toolStripDropDownButton1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
 			// FrmGoL
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.btnSnap);
 			this.Controls.Add(this.lblSpeed);
 			this.Controls.Add(this.nudSpeed);
 			this.Controls.Add(this.dgvCells);
@@ -238,6 +251,7 @@
 		private System.Windows.Forms.NumericUpDown nudSpeed;
 		private System.Windows.Forms.Label lblSpeed;
 		private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+		private System.Windows.Forms.Button btnSnap;
 	}
 }
 
