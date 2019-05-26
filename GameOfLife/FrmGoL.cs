@@ -199,12 +199,10 @@ namespace GameOfLife {
 			txtWidth.Text = colSize.ToString();
 			
 			for (int i = 0; i < automata.Length; i++) {
+				Size coords = ConvertLinearIndexToCoords(i);
 				bool random_life = random.Next(0, 1000) > RANDOMIZE_LIFE_THRESHOLD ? true: false;
 
 				automata[i].IsInitial = random_life;
-
-				Size coords = ConvertLinearIndexToCoords(i);
-
 				ToggleLife(coords, random_life);
 			}
 
