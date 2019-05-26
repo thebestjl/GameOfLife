@@ -23,9 +23,10 @@
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent() {
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmGoL));
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.tsOptions = new System.Windows.Forms.ToolStrip();
+			this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
 			this.btnStart = new System.Windows.Forms.Button();
 			this.btnReset = new System.Windows.Forms.Button();
 			this.btnClear = new System.Windows.Forms.Button();
@@ -37,7 +38,6 @@
 			this.dgvCells = new System.Windows.Forms.DataGridView();
 			this.nudSpeed = new System.Windows.Forms.NumericUpDown();
 			this.lblSpeed = new System.Windows.Forms.Label();
-			this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
 			this.tsOptions.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dgvCells)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudSpeed)).BeginInit();
@@ -52,6 +52,16 @@
 			this.tsOptions.Name = "tsOptions";
 			this.tsOptions.Size = new System.Drawing.Size(800, 27);
 			this.tsOptions.TabIndex = 0;
+			// 
+			// toolStripDropDownButton1
+			// 
+			this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
+			this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+			this.toolStripDropDownButton1.Size = new System.Drawing.Size(75, 24);
+			this.toolStripDropDownButton1.Text = "Options";
+			this.toolStripDropDownButton1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// btnStart
 			// 
@@ -97,14 +107,14 @@
 			// 
 			this.txtWidth.Location = new System.Drawing.Point(723, 342);
 			this.txtWidth.Name = "txtWidth";
-			this.txtWidth.Size = new System.Drawing.Size(65, 22);
+			this.txtWidth.Size = new System.Drawing.Size(60, 22);
 			this.txtWidth.TabIndex = 5;
 			// 
 			// txtHeight
 			// 
 			this.txtHeight.Location = new System.Drawing.Point(723, 371);
 			this.txtHeight.Name = "txtHeight";
-			this.txtHeight.Size = new System.Drawing.Size(65, 22);
+			this.txtHeight.Size = new System.Drawing.Size(60, 22);
 			this.txtHeight.TabIndex = 6;
 			// 
 			// lblWidth
@@ -141,11 +151,11 @@
 			dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.ControlText;
 			dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
 			this.dgvCells.DefaultCellStyle = dataGridViewCellStyle1;
-			this.dgvCells.Location = new System.Drawing.Point(12, 31);
+			this.dgvCells.Location = new System.Drawing.Point(15, 35);
 			this.dgvCells.Name = "dgvCells";
 			this.dgvCells.RowHeadersVisible = false;
 			this.dgvCells.RowTemplate.Height = 24;
-			this.dgvCells.Size = new System.Drawing.Size(650, 407);
+			this.dgvCells.Size = new System.Drawing.Size(650, 405);
 			this.dgvCells.TabIndex = 9;
 			this.dgvCells.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCells_CellClick);
 			// 
@@ -169,7 +179,7 @@
             0,
             131072});
 			this.nudSpeed.Name = "nudSpeed";
-			this.nudSpeed.Size = new System.Drawing.Size(59, 22);
+			this.nudSpeed.Size = new System.Drawing.Size(60, 22);
 			this.nudSpeed.TabIndex = 10;
 			this.nudSpeed.Value = new decimal(new int[] {
             10,
@@ -185,16 +195,6 @@
 			this.lblSpeed.Size = new System.Drawing.Size(53, 17);
 			this.lblSpeed.TabIndex = 11;
 			this.lblSpeed.Text = "Speed:";
-			// 
-			// toolStripDropDownButton1
-			// 
-			this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-			this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
-			this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-			this.toolStripDropDownButton1.Size = new System.Drawing.Size(75, 24);
-			this.toolStripDropDownButton1.Text = "Options";
-			this.toolStripDropDownButton1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// FrmGoL
 			// 

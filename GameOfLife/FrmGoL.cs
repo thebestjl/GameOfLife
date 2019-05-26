@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -33,6 +29,7 @@ namespace GameOfLife {
 			txtHeight.Text = "10";
 			run_speed = 1000;
 			finished_running = true;
+			ResizeGoL();
 		}
 
 		private void InitializeAutomata() {
@@ -51,8 +48,12 @@ namespace GameOfLife {
 		#region Event Handler Functions
 		private void dgvCells_CellClick(object sender, DataGridViewCellEventArgs e) {
 			dgvCells.ClearSelection();
+
+			if (!running) {
+				automata[e.ColumnIndex, e.RowIndex].IsInitial = !automata[e.ColumnIndex, e.RowIndex].IsAlive;
+			}
+
 			ToggleLife(e.ColumnIndex, e.RowIndex, !automata[e.ColumnIndex, e.RowIndex].IsAlive);
-			automata[e.ColumnIndex, e.RowIndex].IsInitial = true;
 		}
 
 		private void TxtHeight_TextChanged(object sender, EventArgs e) {
@@ -64,7 +65,7 @@ namespace GameOfLife {
 		}
 
 		private void nudSpeed_ValueChanged(object sender, EventArgs e) {
-			run_speed = (int) nudSpeed.Value * 1000;
+			run_speed = (int) (1 / nudSpeed.Value) * 1000;
 		}
 
 		private void btnStart_Click(object sender, EventArgs e) {
@@ -226,6 +227,7 @@ namespace GameOfLife {
 			if (GridHasValidDimesions()) {
 				UpdateRowAndColumnSize();
 				dgvCells.Height = dgvCells.Rows.GetRowsHeight(DataGridViewElementStates.Visible);
+				ResizeGoL();
 			}
 		}
 
@@ -245,14 +247,62 @@ namespace GameOfLife {
 				}
 			} else {
 				if (automata[col, row].IsAlive) {
-					dgvCells[col, row].Style.BackColor = Color.Red;
+					dgvCells[col, row].Style.BackColor = Color.White;
 				}
 				else {
-					dgvCells[col, row].Style.BackColor = Color.Green;
+					dgvCells[col, row].Style.BackColor = Color.Blue;
 				}
 			}
 		}
 
+		private void ResizeGoL() {
+			int button_spacerX = 4;
+			int button_height = btnStart.Height;
+
+			int cellHeight = dgvCells[0, 0].Size.Height;
+
+			dgvCells.Width = dgvCol * cellHeight + cellHeight;
+			dgvCells.Height = dgvRow * cellHeight + button_height;
+			
+			int btnStartX = dgvCells.Location.X + dgvCells.Width + button_spacerX;
+			int btnStartY = dgvCells.Location.Y;
+			int btnResetY = dgvCells.Location.Y + button_height;
+			int btnClearY = dgvCells.Location.Y + 2 * button_height;
+			int lblSpeedY = (int)(dgvCells.Location.Y + 3.5 * button_height);
+			int nudSpeedX = btnStartX + lblSpeed.Width;
+
+			int lblHeightY_1 = lblSpeedY + button_height;
+			int lblHeightY_2 = btnStartY + dgvCells.Height - (3 * button_height);
+			int lblHeightY = lblHeightY_1 >= lblHeightY_2 ? lblHeightY_1 : lblHeightY_2;
+			int lblWidthY = lblHeightY + button_height;
+			int btnRandomizeY = lblWidthY + button_height;
+
+			btnStart.Location = new Point(btnStartX, btnStartY);
+			btnReset.Location = new Point(btnStartX, btnResetY);
+			btnClear.Location = new Point(btnStartX, btnClearY);
+			lblSpeed.Location = new Point(btnStartX, lblSpeedY);
+			nudSpeed.Location = new Point(nudSpeedX, lblSpeedY - 3);
+
+			lblHeight.Location = new Point(btnStartX, lblHeightY);
+			lblWidth.Location = new Point(btnStartX, lblWidthY);
+
+			txtHeight.Location = new Point(nudSpeedX, lblHeightY - 3);
+			txtWidth.Location = new Point(nudSpeedX, lblWidthY - 3);
+
+			btnRandomize.Location = new Point(btnStartX, btnRandomizeY);
+
+			int clientSizeHeight_1 = btnRandomizeY + button_height + 3;
+			int clientSizeHeight_2 = dgvCells.Height + btnStartY;
+
+			int clientSizeHeight = clientSizeHeight_1 > clientSizeHeight_2 ? clientSizeHeight_1 : clientSizeHeight_2;
+			int clientSizeWidth = btnStartX + btnStart.Width + 3;
+			ClientSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
+			MinimumSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
+			MaximumSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
+		}
+		#endregion
+
+		#region Console Functions
 		private void PrintCellData() {
 			if (display_cell_info) {
 				StringBuilder sb = new StringBuilder();
