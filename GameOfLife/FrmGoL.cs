@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,6 +16,7 @@ namespace GameOfLife {
 		private const bool display_cell_info = false;
 		private int run_speed;
 		private const int RANDOMIZE_LIFE_THRESHOLD = 750;
+		private const char DELIMITER = ';';
 
 		public FrmGoL() {
 			InitializeComponent();
@@ -54,7 +56,7 @@ namespace GameOfLife {
 			}
 			Size coords = new Size(e.ColumnIndex, e.RowIndex);
 
-			ToggleLife(coords, !automata[index].IsAlive); 
+			ToggleLife(coords, !automata[index].IsAlive);
 		}
 
 		private void TxtHeight_TextChanged(object sender, EventArgs e) {
@@ -66,7 +68,7 @@ namespace GameOfLife {
 		}
 
 		private void nudSpeed_ValueChanged(object sender, EventArgs e) {
-			run_speed = (int) (1 / nudSpeed.Value) * 1000;
+			run_speed = (int)(1 / nudSpeed.Value) * 1000;
 		}
 
 		private void btnStart_Click(object sender, EventArgs e) {
@@ -99,9 +101,17 @@ namespace GameOfLife {
 		private void btnSnap_Click(object sender, EventArgs e) {
 			RestoreBalance();
 		}
+
+		private void exportCurrentStateToolStripMenuItem_Click(object sender, EventArgs e) {
+			ExportCurrentState();
+		}
+
+		private void loadStateFromFileToolStripMenuItem_Click(object sender, EventArgs e) {
+			LoadStateFromFile();
+		}
 		#endregion
 
-		#region Helper Functions
+		#region async
 		private async void RunProgram() {
 			finished_running = false;
 			txtHeight.Enabled = false;
@@ -111,7 +121,7 @@ namespace GameOfLife {
 				while (running) {
 					System.Threading.Thread.Sleep(run_speed);
 					UpdateLiveCells();
-					
+
 					PrintCellData();
 				}
 				return;
@@ -165,6 +175,40 @@ namespace GameOfLife {
 			}
 		}
 
+		private async void RandomizeCells() {
+			bool resume_running = running;
+			Random random = new Random();
+
+			await Task.Run(() => {
+				running = false;
+				while (!finished_running) {
+					System.Threading.Thread.Sleep(10);
+				}
+			});
+
+			int rowSize = random.Next(1, 30);
+			int colSize = random.Next(1, 30);
+
+			txtHeight.Text = rowSize.ToString();
+			txtWidth.Text = colSize.ToString();
+
+			for (int i = 0; i < automata.Length; i++) {
+				Size coords = ConvertLinearIndexToCoords(i);
+				bool random_life = random.Next(0, 1000) > RANDOMIZE_LIFE_THRESHOLD ? true : false;
+
+				automata[i].IsInitial = random_life;
+				ToggleLife(coords, random_life);
+			}
+
+			running = resume_running;
+			if (running) {
+				RunProgram();
+			}
+		}
+
+		#endregion
+
+		#region Helper Functions
 		private List<Size> InsertionSort(List<Size> sizes) {
 			int i = 1;
 			while (i < sizes.Count) {
@@ -181,35 +225,27 @@ namespace GameOfLife {
 			return sizes;
 		}
 
-		private async void RandomizeCells() {
-			bool resume_running = running;
-			Random random = new Random();
+		private int GetBoundry(int val, int size) {
+			int ret_val = val - (val / size) * size;
+			return ret_val >= 0 ? ret_val : size + ret_val;
+		}
 
-			await Task.Run(() => {
-				running = false;
-				while (!finished_running) {
-					System.Threading.Thread.Sleep(10);
-				}				
-			});
+		private int GetLinearizedIndex(int col, int row) {
+			return (col * dgvRow) + row;
+		}
 
-			int rowSize = random.Next(1, 30);
-			int colSize = random.Next(1, 30);
-			
-			txtHeight.Text = rowSize.ToString();
-			txtWidth.Text = colSize.ToString();
-			
-			for (int i = 0; i < automata.Length; i++) {
-				Size coords = ConvertLinearIndexToCoords(i);
-				bool random_life = random.Next(0, 1000) > RANDOMIZE_LIFE_THRESHOLD ? true: false;
+		private Size ConvertLinearIndexToCoords(int i) {
+			int col = i / dgvRow;
+			int row = i - col * dgvRow;
 
-				automata[i].IsInitial = random_life;
-				ToggleLife(coords, random_life);
-			}
+			return new Size(col, row);
+		}
 
-			running = resume_running;
-			if (running) {
-				RunProgram();
-			}
+		private bool GridHasValidDimesions() {
+			bool validColSize = System.Text.RegularExpressions.Regex.IsMatch(txtHeight.Text, "0*[1-9][0-9]*");
+			bool validRowSize = System.Text.RegularExpressions.Regex.IsMatch(txtWidth.Text, "0*[1-9][0-9]*");
+
+			return validColSize && validRowSize;
 		}
 
 		private void UpdateRowAndColumnSize() {
@@ -243,7 +279,7 @@ namespace GameOfLife {
 
 			dgvCells.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 			dgvCells.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders;
-			
+
 			dgvCells.ClearSelection();
 
 			InitializeAutomata();
@@ -262,7 +298,7 @@ namespace GameOfLife {
 						if (!(i == col && j == row)) {
 							int col_ind = GetBoundry(i, dgvCol);
 							int row_ind = GetBoundry(j, dgvRow);
-							
+
 							int inner_index = GetLinearizedIndex(col_ind, row_ind);
 							if (new_state)
 								automata[inner_index].AddNeighbor();
@@ -272,11 +308,6 @@ namespace GameOfLife {
 					}
 				}
 			}
-		}
-
-		private int GetBoundry(int val, int size) {
-			int ret_val = val - (val / size) * size;
-			return ret_val >= 0 ? ret_val : size + ret_val;
 		}
 
 		private void UpdateLiveCells() {
@@ -296,13 +327,6 @@ namespace GameOfLife {
 				dgvCells.Height = dgvCells.Rows.GetRowsHeight(DataGridViewElementStates.Visible);
 				ResizeGoL();
 			}
-		}
-
-		private bool GridHasValidDimesions() {
-			bool validColSize = System.Text.RegularExpressions.Regex.IsMatch(txtHeight.Text, "0*[1-9][0-9]*");
-			bool validRowSize = System.Text.RegularExpressions.Regex.IsMatch(txtWidth.Text, "0*[1-9][0-9]*");
-
-			return validColSize && validRowSize;
 		}
 
 		private void UpdateCellColor(int col, int row, bool new_state) {
@@ -330,7 +354,7 @@ namespace GameOfLife {
 
 			dgvCells.Width = dgvCol * cellHeight + cellHeight;
 			dgvCells.Height = dgvRow * cellHeight + button_height;
-			
+
 			int btnStartX = dgvCells.Location.X + dgvCells.Width + button_spacerX;
 			int btnStartY = dgvCells.Location.Y;
 			int btnResetY = dgvCells.Location.Y + button_height;
@@ -364,16 +388,80 @@ namespace GameOfLife {
 			MinimumSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
 			MaximumSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
 		}
+		#endregion
 
-		private int GetLinearizedIndex(int col, int row) {
-			return (col * dgvRow) + row;
+		#region Text File Functions
+		private void ExportCurrentState() {
+			string cur_directory = Path.GetDirectoryName(Application.ExecutablePath);
+			string fp = Path.Combine(cur_directory, @"data.gol");
+			try {
+				File.Delete(fp);
+			} catch { }
+			
+			using (StreamWriter sw = File.AppendText(fp)) {
+				StringBuilder sb = new StringBuilder();
+				sb.Append(dgvCol);
+				sb.Append(DELIMITER);
+				sb.Append(dgvRow);
+				sb.Append(DELIMITER);
+				sw.WriteLine(sb.ToString());
+
+				for (int i = 0; i < automata.Length; i++) {
+					if (automata[i].IsAlive) {
+						sb.Clear();
+
+						sb.Append(i);
+						sb.Append(DELIMITER);
+						sb.Append(automata[i].IsInitial);
+						sb.Append(DELIMITER);
+						//sb.Append(automata[i].NextState);
+						//sb.Append(DELIMITER);
+						//sb.Append(automata[i].NumNeighbors);
+						//sb.Append(DELIMITER);
+
+						sw.WriteLine(sb.ToString());
+					}
+				}
+			}
 		}
 
-		private Size ConvertLinearIndexToCoords(int i) {
-			int col = i / dgvRow;
-			int row = i - col * dgvRow;
+		private void LoadStateFromFile() {
+			string cur_directory = Path.GetDirectoryName(Application.ExecutablePath);
+			string fp = Path.Combine(cur_directory, @"data.gol");
 
-			return new Size(col, row);
+			try {
+				using (StreamReader sr = File.OpenText(fp)) {
+					string coords = sr.ReadLine();
+					string[] coords_arr = coords.Split(DELIMITER);
+
+					txtWidth.Text = coords_arr[0];
+					txtHeight.Text = coords_arr[1];
+
+					InitializeAutomata();
+				
+					while (!sr.EndOfStream) {
+						string str_cell = sr.ReadLine();
+						string[] cell_arr = str_cell.Split(DELIMITER);
+
+						int.TryParse(cell_arr[0], out int index);
+						bool.TryParse(cell_arr[1], out bool init_state);
+
+						automata[index].IsInitial = init_state;
+						ToggleLife(ConvertLinearIndexToCoords(index), true);
+					}
+				}
+			} catch (FileNotFoundException) {
+				MessageBox.Show("No File to Load.");
+
+			} catch (Exception e) {
+				StringBuilder sberr = new StringBuilder();
+				sberr.Append("Error in loading state:\n");
+				sberr.Append(e.Message);
+				sberr.Append("\nStacktrace:\n");
+				sberr.Append(e.StackTrace);
+
+				MessageBox.Show(sberr.ToString());
+			}
 		}
 		#endregion
 
