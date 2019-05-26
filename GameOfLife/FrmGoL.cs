@@ -54,7 +54,7 @@ namespace GameOfLife {
 			}
 			Size coords = new Size(e.ColumnIndex, e.RowIndex);
 
-			ToggleLife(coords, !automata[index].IsAlive);
+			ToggleLife(coords, !automata[index].IsAlive); 
 		}
 
 		private void TxtHeight_TextChanged(object sender, EventArgs e) {
@@ -199,14 +199,7 @@ namespace GameOfLife {
 			txtWidth.Text = colSize.ToString();
 			
 			for (int i = 0; i < automata.Length; i++) {
-				bool random_life;
-
-				if (random.Next(1, 1000) > RANDOMIZE_LIFE_THRESHOLD) {
-					random_life = true;
-				}
-				else {
-					random_life = false;
-				}
+				bool random_life = random.Next(0, 1000) > RANDOMIZE_LIFE_THRESHOLD ? true: false;
 
 				automata[i].IsInitial = random_life;
 
