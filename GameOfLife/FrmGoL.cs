@@ -407,20 +407,20 @@ namespace GameOfLife {
 				sw.WriteLine(sb.ToString());
 
 				for (int i = 0; i < automata.Length; i++) {
-					if (automata[i].IsAlive) {
-						sb.Clear();
+					sb.Clear();
 
-						sb.Append(i);
-						sb.Append(DELIMITER);
-						sb.Append(automata[i].IsInitial);
-						sb.Append(DELIMITER);
-						//sb.Append(automata[i].NextState);
-						//sb.Append(DELIMITER);
-						//sb.Append(automata[i].NumNeighbors);
-						//sb.Append(DELIMITER);
+					sb.Append(i);
+					sb.Append(DELIMITER);
+					sb.Append(automata[i].IsInitial);
+					sb.Append(DELIMITER);
+					sb.Append(automata[i].IsAlive);
+					sb.Append(DELIMITER);
+					//sb.Append(automata[i].NextState);
+					//sb.Append(DELIMITER);
+					//sb.Append(automata[i].NumNeighbors);
+					//sb.Append(DELIMITER);
 
-						sw.WriteLine(sb.ToString());
-					}
+					sw.WriteLine(sb.ToString());
 				}
 			}
 		}
@@ -445,9 +445,12 @@ namespace GameOfLife {
 
 						int.TryParse(cell_arr[0], out int index);
 						bool.TryParse(cell_arr[1], out bool init_state);
+						bool.TryParse(cell_arr[2], out bool is_alive);
 
 						automata[index].IsInitial = init_state;
-						ToggleLife(ConvertLinearIndexToCoords(index), true);
+
+						if (is_alive)
+							ToggleLife(ConvertLinearIndexToCoords(index), true);
 					}
 				}
 			} catch (FileNotFoundException) {
