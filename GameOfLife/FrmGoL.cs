@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GameOfLife {
+
 	public partial class FrmGoL : Form {
 		private CellularAutomaton[] automata;
 		private int dgvRow;
@@ -17,6 +19,8 @@ namespace GameOfLife {
 		private int run_speed;
 		private const int RANDOMIZE_LIFE_THRESHOLD = 750;
 		private const char DELIMITER = ';';
+		private CancellationTokenSource ctsCancel;
+		private CancellationTokenSource ctsPause;
 
 		public FrmGoL() {
 			InitializeComponent();
@@ -24,14 +28,26 @@ namespace GameOfLife {
 		}
 
 		private void InitializeControls() {
+			ctsCancel = new CancellationTokenSource();
+			ctsPause = new CancellationTokenSource();
 			txtWidth.TextChanged += TxtWidth_TextChanged;
 			txtHeight.TextChanged += TxtHeight_TextChanged;
+
+			txtWidth.LostFocus += txtWidth_FocusOut;
+			txtHeight.LostFocus += txtHeight_FocusOut;
+
 			nudSpeed.ValueChanged += nudSpeed_ValueChanged;
-			running = false;
 			txtWidth.Text = "10";
 			txtHeight.Text = "10";
+
+			WidthHeightChanged(txtHeight);
+			WidthHeightChanged(txtWidth);
+
 			run_speed = 1000;
+			running = false;
 			finished_running = true;
+			
+
 			ResizeGoL();
 		}
 
@@ -59,16 +75,24 @@ namespace GameOfLife {
 			ToggleLife(coords, !automata[index].IsAlive);
 		}
 
-		private void TxtHeight_TextChanged(object sender, EventArgs e) {
+		private void txtHeight_FocusOut(object sender, EventArgs e) {
 			WidthHeightChanged(txtHeight);
 		}
 
-		private void TxtWidth_TextChanged(object sender, EventArgs e) {
+		private void txtWidth_FocusOut(object sender, EventArgs e) {
 			WidthHeightChanged(txtWidth);
 		}
 
+		private void TxtHeight_TextChanged(object sender, EventArgs e) {
+			FixWidthHeightFormat(txtHeight);
+		}
+
+		private void TxtWidth_TextChanged(object sender, EventArgs e) {
+			FixWidthHeightFormat(txtWidth);
+		}
+
 		private void nudSpeed_ValueChanged(object sender, EventArgs e) {
-			run_speed = (int)(1 / nudSpeed.Value) * 1000;
+			run_speed = (int)(1 / nudSpeed.Value * 1000);
 		}
 
 		private void btnStart_Click(object sender, EventArgs e) {
@@ -76,10 +100,14 @@ namespace GameOfLife {
 				btnStart.Text = "Stop";
 				running = true;
 				PrintCellData();
+
 				RunProgram();
 			} else {
 				btnStart.Text = "Start";
+				txtWidth.Enabled = true;
+				txtHeight.Enabled = true;
 				running = false;
+				ctsPause.Cancel();
 			}
 		}
 
@@ -95,10 +123,12 @@ namespace GameOfLife {
 		}
 
 		private void btnRandomize_Click(object sender, EventArgs e) {
+			ctsCancel.Cancel();
 			RandomizeCells();
 		}
 
 		private void btnSnap_Click(object sender, EventArgs e) {
+			ctsCancel.Cancel();
 			RestoreBalance();
 		}
 
@@ -113,23 +143,34 @@ namespace GameOfLife {
 
 		#region async
 		private async void RunProgram() {
-			finished_running = false;
-			txtHeight.Enabled = false;
-			txtWidth.Enabled = false;
+			try {
+				txtWidth.Enabled = false;
+				txtHeight.Enabled = false;
+				ctsCancel = new CancellationTokenSource();
+				ctsPause = new CancellationTokenSource();
+				finished_running = false;				
 
-			await Task.Run(() => {
-				while (running) {
-					System.Threading.Thread.Sleep(run_speed);
-					UpdateLiveCells();
+				await Task.Run(() => {
+					while (running) {
+						if (!ctsPause.Token.IsCancellationRequested)
+							ctsPause.Token.ThrowIfCancellationRequested();
+						else if (!ctsCancel.Token.IsCancellationRequested)
+							ctsCancel.Token.ThrowIfCancellationRequested();
+						Thread.Sleep(run_speed);
+						UpdateLiveCells();
 
-					PrintCellData();
-				}
-				return;
-			});
+						PrintCellData();
+					}
+				});
 
-			txtWidth.Enabled = true;
-			txtHeight.Enabled = true;
-			finished_running = true;
+			} catch (OperationCanceledException) {
+				MessageBox.Show("Paused");
+			} catch (Exception ex) {
+				string strEx = BuildExceptionString(ex);
+				MessageBox.Show(strEx);
+			} finally {
+				finished_running = true;
+			}
 		}
 
 		private async void RestoreBalance() {
@@ -139,7 +180,7 @@ namespace GameOfLife {
 			await Task.Run(() => {
 				running = false;
 				while (!finished_running) {
-					System.Threading.Thread.Sleep(10);
+					Thread.Sleep(0);
 				}
 			});
 
@@ -182,7 +223,7 @@ namespace GameOfLife {
 			await Task.Run(() => {
 				running = false;
 				while (!finished_running) {
-					System.Threading.Thread.Sleep(10);
+					Thread.Sleep(0);
 				}
 			});
 
@@ -191,6 +232,8 @@ namespace GameOfLife {
 
 			txtHeight.Text = rowSize.ToString();
 			txtWidth.Text = colSize.ToString();
+			UpdateRowAndColumnSize();
+			ResizeGoL();
 
 			for (int i = 0; i < automata.Length; i++) {
 				Size coords = ConvertLinearIndexToCoords(i);
@@ -249,15 +292,25 @@ namespace GameOfLife {
 		}
 
 		private void UpdateRowAndColumnSize() {
-			int.TryParse(txtHeight.Text, out dgvRow);
-			int.TryParse(txtWidth.Text, out dgvCol);
+			int.TryParse(txtHeight.Text, out int row);
+			int.TryParse(txtWidth.Text, out int col);
+
+			if (dgvRow == row && dgvCol == col) {
+				return;
+			}
+			else {
+				dgvRow = row;
+				dgvCol = col;
+			}
 
 			if (dgvRow > 30) {
 				txtHeight.Text = "30";
+				WidthHeightChanged(txtHeight);
 				return;
 			}
 			if (dgvCol > 30) {
 				txtWidth.Text = "30";
+				WidthHeightChanged(txtWidth);
 				return;
 			}
 
@@ -308,25 +361,39 @@ namespace GameOfLife {
 					}
 				}
 			}
+
+			if (!ctsCancel.Token.IsCancellationRequested)
+				ctsCancel.Token.ThrowIfCancellationRequested();
 		}
 
 		private void UpdateLiveCells() {
 			for (int i = 0; i < automata.Length; i++) {
+				if (!ctsCancel.Token.IsCancellationRequested)
+					ctsCancel.Token.ThrowIfCancellationRequested();
+
 				bool new_state = automata[i].NextState;
 				ToggleLife(ConvertLinearIndexToCoords(i), new_state);
 			}
 		}
 
 		private void WidthHeightChanged(TextBox textBox) {
-			if (System.Text.RegularExpressions.Regex.IsMatch(textBox.Text, "[^0-9]")) {
-				textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
-			}
-
 			if (GridHasValidDimesions()) {
 				UpdateRowAndColumnSize();
 				dgvCells.Height = dgvCells.Rows.GetRowsHeight(DataGridViewElementStates.Visible);
 				ResizeGoL();
+			} else {
+				txtHeight.Text = dgvRow.ToString();
+				txtWidth.Text = dgvCol.ToString();
 			}
+		}
+
+		private void FixWidthHeightFormat(TextBox textBox) {
+			if (System.Text.RegularExpressions.Regex.IsMatch(textBox.Text, "[^0-9]")) {
+				textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
+			}
+
+			textBox.Text = textBox.Text.TrimStart(new char[] { '0' });
+			//textBox.Select(textBox.Text.Length, 0);
 		}
 
 		private void UpdateCellColor(int col, int row, bool new_state) {
@@ -388,6 +455,17 @@ namespace GameOfLife {
 			MinimumSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
 			MaximumSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
 		}
+
+		private string BuildExceptionString(Exception ex) {
+			StringBuilder sb = new StringBuilder();
+
+			sb.AppendLine("Exception Message:");
+			sb.AppendLine(ex.Message);
+			sb.AppendLine("Stack Trace:");
+			sb.AppendLine(ex.StackTrace);
+
+			return sb.ToString();
+		}
 		#endregion
 
 		#region Text File Functions
@@ -400,25 +478,18 @@ namespace GameOfLife {
 			
 			using (StreamWriter sw = File.AppendText(fp)) {
 				StringBuilder sb = new StringBuilder();
-				sb.Append(dgvCol);
-				sb.Append(DELIMITER);
-				sb.Append(dgvRow);
-				sb.Append(DELIMITER);
+				sb.AppendWithDelimiter(dgvCol, DELIMITER);
+				sb.AppendWithDelimiter(dgvRow, DELIMITER);
 				sw.WriteLine(sb.ToString());
 
 				for (int i = 0; i < automata.Length; i++) {
 					sb.Clear();
+					sb.AppendWithDelimiter(i, DELIMITER);
+					sb.AppendWithDelimiter(automata[i].IsInitial, DELIMITER);
+					sb.AppendWithDelimiter(automata[i].IsAlive, DELIMITER);
 
-					sb.Append(i);
-					sb.Append(DELIMITER);
-					sb.Append(automata[i].IsInitial);
-					sb.Append(DELIMITER);
-					sb.Append(automata[i].IsAlive);
-					sb.Append(DELIMITER);
-					//sb.Append(automata[i].NextState);
-					//sb.Append(DELIMITER);
-					//sb.Append(automata[i].NumNeighbors);
-					//sb.Append(DELIMITER);
+					//sb.AppendWithDelimiter(automata[i].NextState, DELIMITER);
+					//sb.AppendWithDelimiter(automata[i].NumNeighbors, DELIMITER);
 
 					sw.WriteLine(sb.ToString());
 				}
@@ -458,10 +529,10 @@ namespace GameOfLife {
 
 			} catch (Exception e) {
 				StringBuilder sberr = new StringBuilder();
-				sberr.Append("Error in loading state:\n");
-				sberr.Append(e.Message);
-				sberr.Append("\nStacktrace:\n");
-				sberr.Append(e.StackTrace);
+				sberr.AppendLine("Error in loading state:");
+				sberr.AppendLine(e.Message);
+				sberr.AppendLine("Stacktrace:");
+				sberr.AppendLine(e.StackTrace);
 
 				MessageBox.Show(sberr.ToString());
 			}
@@ -484,5 +555,12 @@ namespace GameOfLife {
 			}
 		}
 		#endregion
+	}
+
+	public static class StringBuilderExt {
+		public static void AppendWithDelimiter(this StringBuilder sb, object msg, object del) {
+			sb.Append(msg);
+			sb.Append(del);
+		}
 	}
 }
