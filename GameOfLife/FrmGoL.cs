@@ -156,6 +156,7 @@ namespace GameOfLife {
 							ctsPause.Token.ThrowIfCancellationRequested();
 						else if (!ctsCancel.Token.IsCancellationRequested)
 							ctsCancel.Token.ThrowIfCancellationRequested();
+
 						Thread.Sleep(run_speed);
 						UpdateLiveCells();
 
@@ -284,11 +285,67 @@ namespace GameOfLife {
 			return new Size(col, row);
 		}
 
-		private bool GridHasValidDimesions() {
-			bool validColSize = System.Text.RegularExpressions.Regex.IsMatch(txtHeight.Text, "0*[1-9][0-9]*");
-			bool validRowSize = System.Text.RegularExpressions.Regex.IsMatch(txtWidth.Text, "0*[1-9][0-9]*");
+		private void ToggleLife(Size coords, bool new_state) {
+			int col = coords.Width;
+			int row = coords.Height;
+			UpdateCellColor(col, row, new_state);
+			int index = GetLinearizedIndex(col, row);
+			if (automata[index].IsAlive != new_state) {
+				automata[index].IsAlive = new_state;
 
-			return validColSize && validRowSize;
+				for (int i = col - 1; i <= col + 1; i++) {
+					for (int j = row - 1; j <= row + 1; j++) {
+						if (!(i == col && j == row)) {
+							int col_ind = GetBoundry(i, dgvCol);
+							int row_ind = GetBoundry(j, dgvRow);
+
+							int inner_index = GetLinearizedIndex(col_ind, row_ind);
+							if (new_state)
+								automata[inner_index].AddNeighbor();
+							else
+								automata[inner_index].SubNeighbor();
+						}
+					}
+				}
+			}
+
+			if (!ctsCancel.Token.IsCancellationRequested)
+				ctsCancel.Token.ThrowIfCancellationRequested();
+		}
+
+		private void UpdateLiveCells() {
+			for (int i = 0; i < dgvCol; i++) {
+				UpdateLiveCellsAsync(i);
+			}
+		}
+
+		private async void UpdateLiveCellsAsync(int col) {
+			await Task.Run(() => {
+				for (int j = GetLinearizedIndex(col, 0); j < GetLinearizedIndex(col, dgvRow); j++) {
+					if (!ctsCancel.Token.IsCancellationRequested)
+						ctsCancel.Token.ThrowIfCancellationRequested();
+
+					bool new_state = automata[j].NextState;
+					ToggleLife(ConvertLinearIndexToCoords(j), new_state);
+				}
+			});
+		}
+
+		private void UpdateCellColor(int col, int row, bool new_state) {
+			int index = GetLinearizedIndex(col, row);
+			if (automata[index].IsAlive == new_state) {
+				if (automata[index].IsAlive) {
+					dgvCells[col, row].Style.BackColor = Color.Blue;
+				} else {
+					dgvCells[col, row].Style.BackColor = Color.White;
+				}
+			} else {
+				if (automata[index].IsAlive) {
+					dgvCells[col, row].Style.BackColor = Color.White;
+				} else {
+					dgvCells[col, row].Style.BackColor = Color.Blue;
+				}
+			}
 		}
 
 		private void UpdateRowAndColumnSize() {
@@ -338,42 +395,11 @@ namespace GameOfLife {
 			InitializeAutomata();
 		}
 
-		private void ToggleLife(Size coords, bool new_state) {
-			int col = coords.Width;
-			int row = coords.Height;
-			UpdateCellColor(col, row, new_state);
-			int index = GetLinearizedIndex(col, row);
-			if (automata[index].IsAlive != new_state) {
-				automata[index].IsAlive = new_state;
+		private bool GridHasValidDimesions() {
+			bool validColSize = System.Text.RegularExpressions.Regex.IsMatch(txtHeight.Text, "0*[1-9][0-9]*");
+			bool validRowSize = System.Text.RegularExpressions.Regex.IsMatch(txtWidth.Text, "0*[1-9][0-9]*");
 
-				for (int i = col - 1; i <= col + 1; i++) {
-					for (int j = row - 1; j <= row + 1; j++) {
-						if (!(i == col && j == row)) {
-							int col_ind = GetBoundry(i, dgvCol);
-							int row_ind = GetBoundry(j, dgvRow);
-
-							int inner_index = GetLinearizedIndex(col_ind, row_ind);
-							if (new_state)
-								automata[inner_index].AddNeighbor();
-							else
-								automata[inner_index].SubNeighbor();
-						}
-					}
-				}
-			}
-
-			if (!ctsCancel.Token.IsCancellationRequested)
-				ctsCancel.Token.ThrowIfCancellationRequested();
-		}
-
-		private void UpdateLiveCells() {
-			for (int i = 0; i < automata.Length; i++) {
-				if (!ctsCancel.Token.IsCancellationRequested)
-					ctsCancel.Token.ThrowIfCancellationRequested();
-
-				bool new_state = automata[i].NextState;
-				ToggleLife(ConvertLinearIndexToCoords(i), new_state);
-			}
+			return validColSize && validRowSize;
 		}
 
 		private void WidthHeightChanged(TextBox textBox) {
@@ -381,7 +407,8 @@ namespace GameOfLife {
 				UpdateRowAndColumnSize();
 				dgvCells.Height = dgvCells.Rows.GetRowsHeight(DataGridViewElementStates.Visible);
 				ResizeGoL();
-			} else {
+			}
+			else {
 				txtHeight.Text = dgvRow.ToString();
 				txtWidth.Text = dgvCol.ToString();
 			}
@@ -394,24 +421,6 @@ namespace GameOfLife {
 
 			textBox.Text = textBox.Text.TrimStart(new char[] { '0' });
 			//textBox.Select(textBox.Text.Length, 0);
-		}
-
-		private void UpdateCellColor(int col, int row, bool new_state) {
-			int index = GetLinearizedIndex(col, row);
-			if (automata[index].IsAlive == new_state) {
-				if (automata[index].IsAlive) {
-					dgvCells[col, row].Style.BackColor = Color.Blue;
-				} else {
-					dgvCells[col, row].Style.BackColor = Color.White;
-				}
-			} else {
-				if (automata[index].IsAlive) {
-					dgvCells[col, row].Style.BackColor = Color.White;
-				}
-				else {
-					dgvCells[col, row].Style.BackColor = Color.Blue;
-				}
-			}
 		}
 
 		private void ResizeGoL() {
