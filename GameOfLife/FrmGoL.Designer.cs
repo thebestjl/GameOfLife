@@ -27,6 +27,8 @@
 			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.tsOptions = new System.Windows.Forms.ToolStrip();
 			this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+			this.exportCurrentStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.loadStateFromFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.btnStart = new System.Windows.Forms.Button();
 			this.btnReset = new System.Windows.Forms.Button();
 			this.btnClear = new System.Windows.Forms.Button();
@@ -39,8 +41,7 @@
 			this.nudSpeed = new System.Windows.Forms.NumericUpDown();
 			this.lblSpeed = new System.Windows.Forms.Label();
 			this.btnSnap = new System.Windows.Forms.Button();
-			this.exportCurrentStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.loadStateFromFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.chkAsync = new System.Windows.Forms.CheckBox();
 			this.tsOptions.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dgvCells)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudSpeed)).BeginInit();
@@ -68,6 +69,20 @@
 			this.toolStripDropDownButton1.Size = new System.Drawing.Size(75, 24);
 			this.toolStripDropDownButton1.Text = "Options";
 			this.toolStripDropDownButton1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// exportCurrentStateToolStripMenuItem
+			// 
+			this.exportCurrentStateToolStripMenuItem.Name = "exportCurrentStateToolStripMenuItem";
+			this.exportCurrentStateToolStripMenuItem.Size = new System.Drawing.Size(220, 26);
+			this.exportCurrentStateToolStripMenuItem.Text = "Export Current State";
+			this.exportCurrentStateToolStripMenuItem.Click += new System.EventHandler(this.exportCurrentStateToolStripMenuItem_Click);
+			// 
+			// loadStateFromFileToolStripMenuItem
+			// 
+			this.loadStateFromFileToolStripMenuItem.Name = "loadStateFromFileToolStripMenuItem";
+			this.loadStateFromFileToolStripMenuItem.Size = new System.Drawing.Size(220, 26);
+			this.loadStateFromFileToolStripMenuItem.Text = "Load State From File";
+			this.loadStateFromFileToolStripMenuItem.Click += new System.EventHandler(this.loadStateFromFileToolStripMenuItem_Click);
 			// 
 			// btnStart
 			// 
@@ -213,25 +228,22 @@
 			this.btnSnap.UseVisualStyleBackColor = true;
 			this.btnSnap.Click += new System.EventHandler(this.btnSnap_Click);
 			// 
-			// exportCurrentStateToolStripMenuItem
+			// chkAsync
 			// 
-			this.exportCurrentStateToolStripMenuItem.Name = "exportCurrentStateToolStripMenuItem";
-			this.exportCurrentStateToolStripMenuItem.Size = new System.Drawing.Size(220, 26);
-			this.exportCurrentStateToolStripMenuItem.Text = "Export Current State";
-			this.exportCurrentStateToolStripMenuItem.Click += new System.EventHandler(this.exportCurrentStateToolStripMenuItem_Click);
-			// 
-			// loadStateFromFileToolStripMenuItem
-			// 
-			this.loadStateFromFileToolStripMenuItem.Name = "loadStateFromFileToolStripMenuItem";
-			this.loadStateFromFileToolStripMenuItem.Size = new System.Drawing.Size(220, 26);
-			this.loadStateFromFileToolStripMenuItem.Text = "Load State From File";
-			this.loadStateFromFileToolStripMenuItem.Click += new System.EventHandler(this.loadStateFromFileToolStripMenuItem_Click);
+			this.chkAsync.AutoSize = true;
+			this.chkAsync.Location = new System.Drawing.Point(672, 206);
+			this.chkAsync.Name = "chkAsync";
+			this.chkAsync.Size = new System.Drawing.Size(98, 21);
+			this.chkAsync.TabIndex = 13;
+			this.chkAsync.Text = "Run Async";
+			this.chkAsync.UseVisualStyleBackColor = true;
 			// 
 			// FrmGoL
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.chkAsync);
 			this.Controls.Add(this.btnSnap);
 			this.Controls.Add(this.lblSpeed);
 			this.Controls.Add(this.nudSpeed);
@@ -273,6 +285,7 @@
 		private System.Windows.Forms.Button btnSnap;
 		private System.Windows.Forms.ToolStripMenuItem exportCurrentStateToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem loadStateFromFileToolStripMenuItem;
+		private System.Windows.Forms.CheckBox chkAsync;
 	}
 }
 

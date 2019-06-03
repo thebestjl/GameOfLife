@@ -314,8 +314,21 @@ namespace GameOfLife {
 		}
 
 		private void UpdateLiveCells() {
-			for (int i = 0; i < dgvCol; i++) {
-				UpdateLiveCellsAsync(i);
+
+			if (chkAsync.Checked) {
+				for (int i = 0; i < dgvCol; i++) {
+					UpdateLiveCellsAsync(i);
+				}
+				Thread.Sleep(5);
+			}			
+			else {
+				for (int i = 0; i < automata.Length; i++) {
+					if (!ctsCancel.Token.IsCancellationRequested)
+						ctsCancel.Token.ThrowIfCancellationRequested();
+
+					bool new_state = automata[i].NextState;
+					ToggleLife(ConvertLinearIndexToCoords(i), new_state);
+				}
 			}
 		}
 
@@ -460,6 +473,8 @@ namespace GameOfLife {
 			txtWidth.Location = new Point(nudSpeedX, lblWidthY - 3);
 			btnRandomize.Location = new Point(btnStartX, btnRandomizeY);
 
+			chkAsync.Location = new Point(btnStartX, btnSnapY + button_height);
+
 			ClientSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
 			MinimumSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
 			MaximumSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
@@ -516,6 +531,8 @@ namespace GameOfLife {
 
 					txtWidth.Text = coords_arr[0];
 					txtHeight.Text = coords_arr[1];
+					UpdateRowAndColumnSize();
+					ResizeGoL();
 
 					InitializeAutomata();
 				
