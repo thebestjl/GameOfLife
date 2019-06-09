@@ -42,6 +42,7 @@
 			this.lblSpeed = new System.Windows.Forms.Label();
 			this.btnSnap = new System.Windows.Forms.Button();
 			this.chkAsync = new System.Windows.Forms.CheckBox();
+			this.ofdOpen = new System.Windows.Forms.OpenFileDialog();
 			this.tsOptions.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dgvCells)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudSpeed)).BeginInit();
@@ -286,6 +287,7 @@
 		private System.Windows.Forms.ToolStripMenuItem exportCurrentStateToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem loadStateFromFileToolStripMenuItem;
 		private System.Windows.Forms.CheckBox chkAsync;
+		private System.Windows.Forms.OpenFileDialog ofdOpen;
 	}
 }
 

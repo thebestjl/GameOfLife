@@ -47,8 +47,29 @@ namespace GameOfLife {
 			running = false;
 			finished_running = true;
 			
-
 			ResizeGoL();
+
+			InitializeOpenFileDialog();
+		}
+
+		private void InitializeOpenFileDialog() {
+			string init_dir = Path.GetDirectoryName(Application.ExecutablePath);
+			init_dir = Path.Combine(init_dir, "SavedGoLStates");
+			if (!Directory.Exists(init_dir)) {
+				Directory.CreateDirectory(init_dir);
+			}
+
+			ofdOpen = new OpenFileDialog {
+				InitialDirectory = init_dir,
+				Title = "Browse GoL States",
+				CheckFileExists = true,
+				CheckPathExists = true,
+				DefaultExt = "gol",
+				Filter = "gol files (*.gol)|*.gol|All files (*.*)|*.*",
+				FilterIndex = 2,
+				Multiselect = false,
+				RestoreDirectory = true
+		};
 		}
 
 		private void InitializeAutomata() {
@@ -137,7 +158,9 @@ namespace GameOfLife {
 		}
 
 		private void loadStateFromFileToolStripMenuItem_Click(object sender, EventArgs e) {
-			LoadStateFromFile();
+			if (ofdOpen.ShowDialog() == DialogResult.OK) {
+				LoadStateFromFile(ofdOpen.FileName);
+			}
 		}
 		#endregion
 
@@ -527,7 +550,9 @@ namespace GameOfLife {
 		#region Text File Functions
 		private void ExportCurrentState() {
 			string cur_directory = Path.GetDirectoryName(Application.ExecutablePath);
-			string fp = Path.Combine(cur_directory, @"data.gol");
+			cur_directory = Path.Combine(cur_directory, "SavedGoLStates");
+			string saveFileName = GetDefaultFileName();
+			string fp = Path.Combine(cur_directory, saveFileName);
 			try {
 				File.Delete(fp);
 			} catch { }
@@ -552,9 +577,16 @@ namespace GameOfLife {
 			}
 		}
 
-		private void LoadStateFromFile() {
-			string cur_directory = Path.GetDirectoryName(Application.ExecutablePath);
-			string fp = Path.Combine(cur_directory, @"data.gol");
+		private string GetDefaultFileName() {
+			StringBuilder sb = new StringBuilder();
+			sb.Append("data");
+			sb.Append(DateTime.Now.ToString("yyMMddhhmmss"));
+			sb.Append(".gol");
+			return sb.ToString();
+		}
+
+		private void LoadStateFromFile(string fileName) {
+			string fp = fileName;
 
 			try {
 				using (StreamReader sr = File.OpenText(fp)) {
