@@ -285,6 +285,54 @@ namespace GameOfLife {
 			return new Size(col, row);
 		}
 
+		private void UpdateLife(int i) {
+			Size coords = ConvertLinearIndexToCoords(i);
+			int col = coords.Height;
+			int row = coords.Width;
+			if (automata[i].IsAlive == automata[i].NextState) {
+				if (automata[i].IsAlive) {
+					dgvCells[row, col].Style.BackColor = Color.Blue;
+				}
+				else {
+					dgvCells[row, col].Style.BackColor = Color.White;
+				}
+			}
+			else {
+				if (automata[i].IsAlive) {
+					dgvCells[row, col].Style.BackColor = Color.White;
+				}
+				else {
+					dgvCells[row, col].Style.BackColor = Color.Blue;
+				}
+			}
+		}
+
+		private void UpdateNeighbors(int ind) {
+			Size coords = ConvertLinearIndexToCoords(ind);
+			bool new_state = automata[ind].NextState;
+			int col = coords.Width;
+			int row = coords.Height;
+			int index = GetLinearizedIndex(col, row);
+			if (automata[index].IsAlive != new_state) {
+				automata[index].IsAlive = new_state;
+
+				for (int i = col - 1; i <= col + 1; i++) {
+					for (int j = row - 1; j <= row + 1; j++) {
+						if (!(i == col && j == row)) {
+							int col_ind = GetBoundry(i, dgvCol);
+							int row_ind = GetBoundry(j, dgvRow);
+
+							int inner_index = GetLinearizedIndex(col_ind, row_ind);
+							if (new_state)
+								automata[inner_index].AddNeighbor();
+							else
+								automata[inner_index].SubNeighbor();
+						}
+					}
+				}
+			}
+		}
+
 		private void ToggleLife(Size coords, bool new_state) {
 			int col = coords.Width;
 			int row = coords.Height;
@@ -316,32 +364,27 @@ namespace GameOfLife {
 		private void UpdateLiveCells() {
 
 			if (chkAsync.Checked) {
-				for (int i = 0; i < dgvCol; i++) {
-					UpdateLiveCellsAsync(i);
-				}
-				Thread.Sleep(5);
-			}			
-			else {
+				while(!Parallel.For(0, automata.Length, i => UpdateLife(i)).IsCompleted);
+				
+			} else {
 				for (int i = 0; i < automata.Length; i++) {
-					if (!ctsCancel.Token.IsCancellationRequested)
-						ctsCancel.Token.ThrowIfCancellationRequested();
-
-					bool new_state = automata[i].NextState;
-					ToggleLife(ConvertLinearIndexToCoords(i), new_state);
+					UpdateLife(i);
 				}
+
+			}
+			for (int i = 0; i < automata.Length; i++) {
+				UpdateNeighbors(i);
 			}
 		}
 
-		private async void UpdateLiveCellsAsync(int col) {
-			await Task.Run(() => {
-				for (int j = GetLinearizedIndex(col, 0); j < GetLinearizedIndex(col, dgvRow); j++) {
-					if (!ctsCancel.Token.IsCancellationRequested)
-						ctsCancel.Token.ThrowIfCancellationRequested();
+		private void UpdateLiveCellsLoopBody(int i) {
+			if (!ctsCancel.Token.IsCancellationRequested)
+				ctsCancel.Token.ThrowIfCancellationRequested();
+			else if (ctsCancel.Token.IsCancellationRequested)
+				return;
 
-					bool new_state = automata[j].NextState;
-					ToggleLife(ConvertLinearIndexToCoords(j), new_state);
-				}
-			});
+			bool new_state = automata[i].NextState;
+			ToggleLife(ConvertLinearIndexToCoords(i), new_state);
 		}
 
 		private void UpdateCellColor(int col, int row, bool new_state) {
