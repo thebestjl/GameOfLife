@@ -241,6 +241,7 @@ namespace GameOfLife {
 				bool random_life = random.Next(0, 1000) > RANDOMIZE_LIFE_THRESHOLD ? true : false;
 
 				automata[i].IsInitial = random_life;
+				automata[i].IsAlive = random_life;
 				ToggleLife(coords, random_life);
 			}
 
@@ -362,29 +363,16 @@ namespace GameOfLife {
 		}
 
 		private void UpdateLiveCells() {
-
 			if (chkAsync.Checked) {
 				while(!Parallel.For(0, automata.Length, i => UpdateLife(i)).IsCompleted);
-				
 			} else {
 				for (int i = 0; i < automata.Length; i++) {
 					UpdateLife(i);
 				}
-
 			}
 			for (int i = 0; i < automata.Length; i++) {
 				UpdateNeighbors(i);
 			}
-		}
-
-		private void UpdateLiveCellsLoopBody(int i) {
-			if (!ctsCancel.Token.IsCancellationRequested)
-				ctsCancel.Token.ThrowIfCancellationRequested();
-			else if (ctsCancel.Token.IsCancellationRequested)
-				return;
-
-			bool new_state = automata[i].NextState;
-			ToggleLife(ConvertLinearIndexToCoords(i), new_state);
 		}
 
 		private void UpdateCellColor(int col, int row, bool new_state) {
@@ -494,7 +482,8 @@ namespace GameOfLife {
 			int lblSpeedY = (int)(dgvCells.Location.Y + 3.5 * button_height);
 			int nudSpeedX = btnStartX + lblSpeed.Width;
 			int btnSnapY = lblSpeedY + button_height;
-			int lblHeightY_1 = btnSnapY + button_height;
+			int chkAsyncY = btnSnapY + button_height;
+			int lblHeightY_1 = chkAsyncY + button_height;
 			int lblHeightY_2 = btnStartY + dgvCells.Height - (3 * button_height);
 			int lblHeightY = lblHeightY_1 >= lblHeightY_2 ? (lblHeightY_1 + 3) : (lblHeightY_2 + 3);
 			int lblWidthY = lblHeightY + button_height;
@@ -516,7 +505,7 @@ namespace GameOfLife {
 			txtWidth.Location = new Point(nudSpeedX, lblWidthY - 3);
 			btnRandomize.Location = new Point(btnStartX, btnRandomizeY);
 
-			chkAsync.Location = new Point(btnStartX, btnSnapY + button_height);
+			chkAsync.Location = new Point(btnStartX, chkAsyncY);
 
 			ClientSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
 			MinimumSize = new Size(clientSizeWidth + 20, clientSizeHeight + 50);
