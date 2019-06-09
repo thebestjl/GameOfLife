@@ -7,18 +7,34 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+/*
+ *	CONWAY'S GAME OF LIFE 
+ *	
+ *	RULES:
+ *	Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+ *	Any live cell with two or three live neighbours lives on to the next generation.
+ *	Any live cell with more than three live neighbours dies, as if by overpopulation.
+ *	Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+ *	
+ *	THINGS I WOULD STILL LIKE TO DO:
+ *	Create a custom control to use in place of a datagridview full of text boxes because:
+ *		The text boxes are not always consistent sizes
+ *		The DataGridView always has some extra space at the bottom for some reason
+ *		The DataGridView sometimes has scroll bars
+ */
+
 namespace GameOfLife {
 
 	public partial class FrmGoL : Form {
 		private CellularAutomaton[] automata;
-		private int dgvRow;
-		private int dgvCol;
-		private bool running;
-		private bool finished_running;
-		private const bool display_cell_info = false;
-		private int run_speed;
-		private const int RANDOMIZE_LIFE_THRESHOLD = 750;
-		private const char DELIMITER = ';';
+		private int dgvRow;			//RowSize
+		private int dgvCol;			//ColumnSize
+		private bool running;		
+		private bool finished_running;	//Prevents bad things from happening while a loop is still iterating.
+		private const bool display_cell_info = false;	//A fun console logging control
+		private int run_speed;		//How fast the program runs. Currently capped between 0.25x and 5.00x speed.
+		private const int RANDOMIZE_LIFE_THRESHOLD = 750;	//Divided by 10, roughly the percent chance a cell alive when randomizing cells.
+		private const char DELIMITER = ';';	//Used in saving/loading states, to distinguish one cell from another.
 		private CancellationTokenSource ctsCancel;
 		private CancellationTokenSource ctsPause;
 
@@ -27,28 +43,29 @@ namespace GameOfLife {
 			InitializeControls();
 		}
 
+		/*
+		 * Sets event handlers, and default variable values
+		 */
 		private void InitializeControls() {
 			ctsCancel = new CancellationTokenSource();
 			ctsPause = new CancellationTokenSource();
+
 			txtWidth.TextChanged += TxtWidth_TextChanged;
 			txtHeight.TextChanged += TxtHeight_TextChanged;
-
 			txtWidth.LostFocus += txtWidth_FocusOut;
 			txtHeight.LostFocus += txtHeight_FocusOut;
-
 			nudSpeed.ValueChanged += nudSpeed_ValueChanged;
-			txtWidth.Text = "10";
-			txtHeight.Text = "10";
-
-			WidthHeightChanged(txtHeight);
-			WidthHeightChanged(txtWidth);
 
 			run_speed = 1000;
 			running = false;
 			finished_running = true;
-			
-			ResizeGoL();
 
+			txtHeight.Text = "10";
+			txtWidth.Text = "10";
+
+			WidthHeightChanged(txtHeight);
+			WidthHeightChanged(txtWidth);
+			ResizeGoL();
 			InitializeOpenFileDialog();
 		}
 
@@ -72,6 +89,9 @@ namespace GameOfLife {
 		};
 		}
 
+		/*
+		 * Reverts automata to initial, unalive state.
+		 */
 		private void InitializeAutomata() {
 			automata = new CellularAutomaton[dgvCol * dgvRow];
 
@@ -164,7 +184,10 @@ namespace GameOfLife {
 		}
 		#endregion
 
-		#region async
+		#region async functions
+		/*
+		 * Main Loop
+		 */
 		private async void RunProgram() {
 			try {
 				txtWidth.Enabled = false;
@@ -179,6 +202,8 @@ namespace GameOfLife {
 							ctsPause.Token.ThrowIfCancellationRequested();
 						else if (!ctsCancel.Token.IsCancellationRequested)
 							ctsCancel.Token.ThrowIfCancellationRequested();
+						else if (ctsPause.Token.IsCancellationRequested || ctsCancel.Token.IsCancellationRequested)
+							break;
 
 						Thread.Sleep(run_speed);
 						UpdateLiveCells();
@@ -197,6 +222,9 @@ namespace GameOfLife {
 			}
 		}
 
+		/*
+		 * Destroys half of all living cells
+		 */
 		private async void RestoreBalance() {
 			bool resume_running = running;
 			Random random = new Random();
@@ -240,6 +268,9 @@ namespace GameOfLife {
 			}
 		}
 
+		/*
+		 * Randomizes currently alive cells
+		 */
 		private async void RandomizeCells() {
 			bool resume_running = running;
 			Random random = new Random();
@@ -250,14 +281,6 @@ namespace GameOfLife {
 					Thread.Sleep(0);
 				}
 			});
-
-			int rowSize = random.Next(1, 30);
-			int colSize = random.Next(1, 30);
-
-			txtHeight.Text = rowSize.ToString();
-			txtWidth.Text = colSize.ToString();
-			UpdateRowAndColumnSize();
-			ResizeGoL();
 
 			for (int i = 0; i < automata.Length; i++) {
 				Size coords = ConvertLinearIndexToCoords(i);
@@ -273,7 +296,6 @@ namespace GameOfLife {
 				RunProgram();
 			}
 		}
-
 		#endregion
 
 		#region Helper Functions
@@ -487,7 +509,6 @@ namespace GameOfLife {
 			}
 
 			textBox.Text = textBox.Text.TrimStart(new char[] { '0' });
-			//textBox.Select(textBox.Text.Length, 0);
 		}
 
 		private void ResizeGoL() {
@@ -597,8 +618,6 @@ namespace GameOfLife {
 					txtHeight.Text = coords_arr[1];
 					UpdateRowAndColumnSize();
 					ResizeGoL();
-
-					InitializeAutomata();
 				
 					while (!sr.EndOfStream) {
 						string str_cell = sr.ReadLine();
